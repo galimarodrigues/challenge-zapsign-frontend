@@ -138,7 +138,6 @@ export class DocumentFormComponent implements OnInit {
   }
 
   private handleCompaniesLoaded(companies: Company[]): void {
-    this.logDebug('COMPANIES LOADED', { companies });
     this.companies.set(companies);
   }
 
@@ -152,8 +151,6 @@ export class DocumentFormComponent implements OnInit {
   }
 
   private handleDocumentLoaded(doc: Document): void {
-    this.logDebug('DOCUMENT LOADED FOR EDIT', { document: doc });
-
     this.documentForm.patchValue({
       name: doc.name,
       date_limit_to_sign: doc.date_limit_to_sign || ''
@@ -172,7 +169,6 @@ export class DocumentFormComponent implements OnInit {
   }
 
   private handleInvalidForm(): void {
-    this.logDebug('FORM INVALID', { errors: this.getFormErrors() });
     this.markFormGroupTouched();
     this.showSnackBar('Por favor, corrija os erros no formulário');
   }
@@ -180,12 +176,6 @@ export class DocumentFormComponent implements OnInit {
   private processFormSubmission(): void {
     this.setLoading(true);
     const submitData = this.prepareSubmitData();
-
-    this.logDebug('FORM SUBMISSION', {
-      editMode: this.isEditMode(),
-      formValue: this.documentForm.value,
-      submitData
-    });
 
     const operation = this.getSubmissionOperation(submitData);
 
@@ -216,16 +206,12 @@ export class DocumentFormComponent implements OnInit {
   }
 
   private handleSubmissionSuccess(response: any): void {
-    this.logDebug('SUBMISSION SUCCESS', { response });
-
     const message = `Documento ${this.isEditMode() ? 'atualizado' : 'criado'} com sucesso`;
     this.showSnackBar(message, 2000);
     this.navigateToDocumentList();
   }
 
   private handleSubmissionError(error: any): void {
-    this.logDebug('SUBMISSION ERROR', { error });
-
     const errorMessage = error.error?.error || error.error?.message || 'Erro ao salvar documento';
     this.showSnackBar(errorMessage, 5000);
     this.setLoading(false);
@@ -264,17 +250,7 @@ export class DocumentFormComponent implements OnInit {
   }
 
   private handleError(message: string, error: any): void {
-    console.error(message, error);
     this.showSnackBar(message);
     this.setLoading(false);
-  }
-
-  private logDebug(title: string, data?: any): void {
-    console.log(`=== ${title} ===`);
-    if (data) {
-      Object.entries(data).forEach(([key, value]) => {
-        console.log(`${key}:`, value);
-      });
-    }
   }
 }

@@ -126,11 +126,7 @@ export class DocumentListComponent implements OnInit {
   }
 
   private handleDocumentsResponse(response: any): void {
-    this.logDebug('DOCUMENTS API RESPONSE', { fullResponse: response });
-
     const documents = this.extractDocumentsFromResponse(response);
-    this.logDocumentsDetails(documents);
-
     this.documents.set(documents);
     this.setLoading(false);
 
@@ -172,7 +168,6 @@ export class DocumentListComponent implements OnInit {
   }
 
   private handleAnalysisError(error: any): void {
-    console.error('Analysis error:', error);
     this.showSnackBar('Erro ao processar análise');
     this.setLoading(false);
   }
@@ -213,47 +208,17 @@ export class DocumentListComponent implements OnInit {
 
   private extractDocumentsFromResponse(response: any): Document[] {
     if (Array.isArray(response)) {
-      this.logDebug('Response type: Direct array');
       return response;
     }
 
     if (response.results && Array.isArray(response.results)) {
-      this.logDebug('Response type: Paginated results', {
-        page: response.page,
-        companyId: response.company_id
-      });
       return response.results;
     }
 
     return [];
   }
 
-  private logDocumentsDetails(documents: Document[]): void {
-    console.log('Documents count:', documents.length);
-
-    documents.forEach((doc, index) => {
-      console.log(`--- Document ${index + 1} ---`);
-      console.log('ID:', doc.id);
-      console.log('Name:', doc.name);
-      console.log('PDF URL:', doc.pdf_url);
-      console.log('Status:', doc.status);
-      console.log('Token:', doc.token);
-      console.log('Open ID:', doc.open_id);
-      console.log('Company:', doc.company);
-      console.log('Created At:', doc.created_at);
-      console.log('Signers:', doc.signers);
-      console.log('Full document object:', doc);
-    });
-  }
-
   private handleDocumentsError(error: any): void {
-    this.logDebug('DOCUMENTS API ERROR', {
-      errorObject: error,
-      message: error.message,
-      status: error.status,
-      details: error.error
-    });
-
     this.showSnackBar('Erro ao carregar documentos');
     this.setLoading(false);
   }
@@ -263,8 +228,6 @@ export class DocumentListComponent implements OnInit {
   }
 
   private executeDocumentDeletion(id: number): void {
-    this.logDebug('DELETING DOCUMENT', { documentId: id });
-
     this.documentService.deleteDocument(id).subscribe({
       next: (response) => this.handleDeletionSuccess(response),
       error: (error) => this.handleDeletionError(error)
@@ -272,13 +235,11 @@ export class DocumentListComponent implements OnInit {
   }
 
   private handleDeletionSuccess(response: any): void {
-    console.log('Delete response:', response);
     this.showSnackBar('Documento excluído', 2000);
     this.loadDocuments();
   }
 
   private handleDeletionError(error: any): void {
-    console.error('Delete error:', error);
     this.showSnackBar('Erro ao excluir');
   }
 
@@ -297,14 +258,5 @@ export class DocumentListComponent implements OnInit {
 
   private showSnackBar(message: string, duration: number = 3000): void {
     this.snackBar.open(message, 'Fechar', { duration });
-  }
-
-  private logDebug(title: string, data?: any): void {
-    console.log(`=== ${title} ===`);
-    if (data) {
-      Object.entries(data).forEach(([key, value]) => {
-        console.log(`${key}:`, value);
-      });
-    }
   }
 }
