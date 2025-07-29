@@ -1,0 +1,161 @@
+<div class="document-list-container">
+  <header class="page-header">
+    <h2>Gestão de Documentos</h2>
+    <button mat-raised-button color="primary" (click)="createDocument()">
+      <mat-icon>add</mat-icon> Novo Documento
+    </button>
+  </header>
+
+  @if (loading()) {
+    <div class="loading-container">
+      <mat-progress-spinner diameter="50"></mat-progress-spinner>
+    </div>
+  }
+
+  @if (!loading() && documents().length === 0) {
+    <div class="empty-state">
+      <mat-icon>description</mat-icon>
+      <p>Nenhum documento encontrado</p>
+      <button mat-button color="primary" (click)="createDocument()">
+        Criar primeiro documento
+      </button>
+    </div>
+  }
+
+  <div class="documents-grid">
+    @for (doc of documents(); track doc.id) {
+      <mat-card class="document-card">
+        <mat-card-content>
+          <div class="document-header">
+            <mat-card-title>{{ doc.name }}</mat-card-title>
+            @if (doc.status) {
+              <span class="status-badge" [class]="'status-' + doc.status">
+                {{ doc.status }}
+              </span>
+            }
+          </div>
+
+          <div class="document-details">
+            <div class="detail-row">
+              <span class="label">ID:</span>
+              <span class="value">{{ doc.id }}</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="label">Token:</span>
+              <span class="value">{{ doc.token || 'N/A' }}</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="label">Open ID:</span>
+              <span class="value">{{ doc.open_id || 'N/A' }}</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="label">External ID:</span>
+              <span class="value">{{ doc.external_id || 'N/A' }}</span>
+            </div>
+
+            @if (doc.created_by) {
+              <div class="detail-row">
+                <span class="label">Criado por:</span>
+                <span class="value">{{ doc.created_by }}</span>
+              </div>
+            }
+
+            <div class="detail-row">
+              <span class="label">Criado em:</span>
+              <span class="value">{{ doc.created_at | date:'short' }}</span>
+            </div>
+
+            @if (doc.last_updated_at) {
+              <div class="detail-row">
+                <span class="label">Atualizado em:</span>
+                <span class="value">{{ doc.last_updated_at | date:'short' }}</span>
+              </div>
+            }
+          </div>
+
+          <!-- Analysis Section -->
+          <div class="analysis-section">
+            @if (hasAnalysis(doc.id!)) {
+              <div class="analysis-info">
+                <div class="analysis-status">
+                  <mat-icon [class]="'status-icon status-' + getAnalysisStatus(doc.id!)">
+                    {{ getAnalysisStatusIcon(doc.id!) }}
+                  </mat-icon>
+                  <span class="status-text">
+                    Análise: {{ getAnalysisStatus(doc.id!) }}
+                  </span>
+                </div>
+              </div>
+            } @else {
+              <div class="no-analysis">
+                <mat-icon>analytics</mat-icon>
+                <span>Sem análise de IA</span>
+              </div>
+            }
+          </div>
+
+          @if (doc.pdf_url) {
+            <a [href]="doc.pdf_url" target="_blank" class="pdf-link">
+              <mat-icon>picture_as_pdf</mat-icon> Visualizar PDF
+            </a>
+          }
+
+          @if (doc.signers && doc.signers.length > 0) {
+            <div class="signers-section">
+              <h4>Signatários ({{ doc.signers.length }})</h4>
+              <div class="signers-list">
+                @for (signer of doc.signers; track signer.id) {
+                  <div class="signer-item">
+                    <div class="signer-info">
+                      <span class="signer-name">{{ signer.name }}</span>
+                      <span class="signer-email">{{ signer.email }}</span>
+                    </div>
+                    <div class="signer-meta">
+                      @if (signer.status) {
+                        <span class="signer-status" [class]="'status-' + signer.status">
+                          {{ signer.status }}
+                        </span>
+                      }
+                      @if (signer.external_id) {
+                        <small class="external-id">Ext ID: {{ signer.external_id }}</small>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </mat-card-content>
+
+        <mat-card-actions align="end">
+          <!-- Analysis Actions -->
+          @if (!hasAnalysis(doc.id!)) {
+            <button mat-button color="accent" (click)="analyzeDocument(doc.id!)" [disabled]="loading()">
+              <mat-icon>analytics</mat-icon> Analisar com IA
+            </button>
+          } @else {
+            @if (getAnalysisStatus(doc.id!) === 'completed') {
+              <button mat-button color="accent" (click)="viewAnalysis(doc.id!)">
+                <mat-icon>visibility</mat-icon> Ver Análise
+              </button>
+            }
+            <button mat-button color="warn" (click)="deleteAnalysis(doc.id!)">
+              <mat-icon>delete_sweep</mat-icon> Excluir Análise
+            </button>
+          }
+
+          <!-- Document Actions -->
+          <button mat-button color="primary" (click)="editDocument(doc.id!)">
+            <mat-icon>edit</mat-icon> Editar
+          </button>
+          <button mat-button color="warn" (click)="deleteDocument(doc.id!)">
+            <mat-icon>delete</mat-icon> Excluir
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    }
+  </div>
+</div>

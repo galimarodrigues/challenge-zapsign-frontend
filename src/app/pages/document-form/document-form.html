@@ -1,0 +1,95 @@
+<div class="form-container">
+  <mat-card>
+    <mat-card-title>{{ isEditMode() ? 'Editar' : 'Novo' }} Documento</mat-card-title>
+    <mat-card-content>
+      @if (loading()) {
+        <div class="loading-container">
+          <mat-progress-spinner diameter="50"></mat-progress-spinner>
+        </div>
+      } @else {
+        <form [formGroup]="documentForm" (ngSubmit)="submit()">
+          <!-- Creation-only fields -->
+          @if (!isEditMode()) {
+            <section class="form-section">
+              <h3>Informações Básicas</h3>
+
+              <mat-form-field class="full-width">
+                <mat-label>Empresa</mat-label>
+                <mat-select formControlName="company">
+                  @for (company of companies(); track company.id) {
+                    <mat-option [value]="company.id">{{ company.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field class="full-width">
+                <mat-label>URL do PDF</mat-label>
+                <input matInput formControlName="pdf_url" placeholder="https://exemplo.com/documento.pdf">
+              </mat-form-field>
+            </section>
+
+            <section class="form-section">
+              <h3>Dados do Signatário</h3>
+
+              <mat-form-field class="full-width">
+                <mat-label>Nome do Signatário</mat-label>
+                <input matInput formControlName="signer_name" placeholder="Nome completo">
+              </mat-form-field>
+
+              <mat-form-field class="full-width">
+                <mat-label>Email do Signatário</mat-label>
+                <input matInput type="email" formControlName="signer_email" placeholder="email@exemplo.com">
+              </mat-form-field>
+            </section>
+
+            <section class="form-section">
+              <h3>Dados Opcionais</h3>
+
+              <mat-form-field class="full-width">
+                <mat-label>Criado por</mat-label>
+                <input matInput formControlName="created_by" placeholder="Nome do criador">
+              </mat-form-field>
+
+              <mat-form-field class="full-width">
+                <mat-label>ID Externo</mat-label>
+                <input matInput formControlName="external_id" placeholder="ID externo opcional">
+              </mat-form-field>
+            </section>
+          }
+
+          <!-- Common fields -->
+          <section class="form-section">
+            <h3>{{ isEditMode() ? 'Campos Editáveis' : 'Documento' }}</h3>
+
+            <mat-form-field class="full-width">
+              <mat-label>Nome do Documento</mat-label>
+              <input matInput formControlName="name" placeholder="Nome do documento">
+            </mat-form-field>
+
+            <div class="date-field full-width">
+              <label for="date_limit_to_sign" class="date-label">Data Limite para Assinar</label>
+              <input
+                id="date_limit_to_sign"
+                type="date"
+                formControlName="date_limit_to_sign"
+                class="date-input"
+                [min]="getTodayString()"
+                placeholder="Selecione uma data">
+            </div>
+          </section>
+
+          <div class="form-actions">
+            <button mat-button type="button" (click)="cancel()">Cancelar</button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="loading() || !documentForm.valid">
+              @if (loading()) {
+                <mat-progress-spinner diameter="20"></mat-progress-spinner>
+              } @else {
+                {{ isEditMode() ? 'Atualizar' : 'Criar' }}
+              }
+            </button>
+          </div>
+        </form>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>
